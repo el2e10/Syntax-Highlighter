@@ -15,7 +15,7 @@ fn compareTokenizerOutputs(got_buffer: std.ArrayList(Token), expected_buffer: st
     }
     for (got_buffer.items, expected_buffer.items) |g_item, e_item| {
         if (g_item.token_type != e_item.token_type) {
-            std.debug.print("Got {any}\n expected {any}\n\n", .{ g_item, e_item });
+            std.debug.print("Got {}\n expected {any}\n\n", .{ g_item, e_item });
             return error.WrongTokenType;
         }
         if (!std.mem.eql(u8, g_item.value, e_item.value)) {
@@ -56,15 +56,15 @@ test "one" {
 
     try program.parseProgram(&buffer);
 
-    for (buffer.items) |item| {
-        std.debug.print("The item is '{s}'\n", .{item.value});
-    }
+    // for (buffer.items) |item| {
+    //     std.debug.print("The item is '{s}'\n", .{item.value});
+    // }
 
     compareTokenizerOutputs(buffer, expected_buffer) catch |err| {
-        std.debug.print("[1/2] Test failed {any}\n\n", .{err});
+        std.debug.print("[1/5] failed {any}\n", .{err});
         return;
     };
-    std.debug.print("[1/2] passed\n\n", .{});
+    std.debug.print("[1/5] passed\n", .{});
 }
 
 test "two" {
@@ -86,14 +86,107 @@ test "two" {
     try expected_buffer.append(Token{ .token_type = TokenType.SYMBOL, .value = "}", .start_index = 15, .end_index = 16 });
 
     try program.parseProgram(&buffer);
-    for (buffer.items) |item| {
-        std.debug.print("The item is '{s}' {any}\n", .{ item.value, item.token_type });
-    }
+    // for (buffer.items) |item| {
+    //     std.debug.print("The item is '{s}' {any}\n", .{ item.value, item.token_type });
+    // }
 
     compareTokenizerOutputs(buffer, expected_buffer) catch |err| {
-        std.debug.print("[2/2] Test failed {any}\n\n", .{err});
+        std.debug.print("[2/5] failed {any}\n", .{err});
         return;
     };
 
-    std.debug.print("[2/2] Test passed\n\n", .{});
+    std.debug.print("[2/5] passed\n", .{});
+}
+
+test "three" {
+    const input_text = "fn _isSymbol(token: u8) bool {";
+    const program = Program.init(input_text);
+
+    var buffer = try std.ArrayList(Token).initCapacity(allocator, 100);
+    var expected_buffer = try std.ArrayList(Token).initCapacity(allocator, 100);
+
+    defer buffer.deinit();
+    defer expected_buffer.deinit();
+
+    try expected_buffer.append(Token{ .token_type = TokenType.KEYWORD, .value = "fn", .start_index = 0, .end_index = 2 });
+    try expected_buffer.append(Token{ .token_type = TokenType.FUNCTION, .value = "_isSymbol", .start_index = 3, .end_index = 12 });
+    try expected_buffer.append(Token{ .token_type = TokenType.SYMBOL, .value = "(", .start_index = 12, .end_index = 13 });
+    try expected_buffer.append(Token{ .token_type = TokenType.IDENTIFIER, .value = "token", .start_index = 13, .end_index = 18 });
+    try expected_buffer.append(Token{ .token_type = TokenType.SYMBOL, .value = ":", .start_index = 18, .end_index = 19 });
+    try expected_buffer.append(Token{ .token_type = TokenType.KEYWORD, .value = "u8", .start_index = 20, .end_index = 22 });
+    try expected_buffer.append(Token{ .token_type = TokenType.SYMBOL, .value = ")", .start_index = 22, .end_index = 23 });
+    try expected_buffer.append(Token{ .token_type = TokenType.KEYWORD, .value = "bool", .start_index = 24, .end_index = 28 });
+    try expected_buffer.append(Token{ .token_type = TokenType.SYMBOL, .value = "{", .start_index = 29, .end_index = 30 });
+
+    try program.parseProgram(&buffer);
+    // for (buffer.items) |item| {
+    //     std.debug.print("The item is '{s}' {any}\n", .{ item.value, item.token_type });
+    // }
+
+    compareTokenizerOutputs(buffer, expected_buffer) catch |err| {
+        std.debug.print("[3/5] failed {any}\n\n", .{err});
+        return;
+    };
+
+    std.debug.print("[3/5] passed\n", .{});
+}
+
+test "four" {
+    const input_text = "const varabl = \"Hello world\";";
+    const program = Program.init(input_text);
+
+    var buffer = try std.ArrayList(Token).initCapacity(allocator, 100);
+    var expected_buffer = try std.ArrayList(Token).initCapacity(allocator, 100);
+
+    defer buffer.deinit();
+    defer expected_buffer.deinit();
+
+    try expected_buffer.append(Token{ .token_type = TokenType.KEYWORD, .value = "const", .start_index = 0, .end_index = 5 });
+    try expected_buffer.append(Token{ .token_type = TokenType.IDENTIFIER, .value = "varabl", .start_index = 6, .end_index = 12 });
+    try expected_buffer.append(Token{ .token_type = TokenType.SYMBOL, .value = "=", .start_index = 13, .end_index = 14 });
+    try expected_buffer.append(Token{ .token_type = TokenType.SYMBOL, .value = "\"", .start_index = 15, .end_index = 16 });
+    try expected_buffer.append(Token{ .token_type = TokenType.LITERAL, .value = "Hello world", .start_index = 16, .end_index = 27 });
+    try expected_buffer.append(Token{ .token_type = TokenType.SYMBOL, .value = "\"", .start_index = 27, .end_index = 28 });
+    try expected_buffer.append(Token{ .token_type = TokenType.SYMBOL, .value = ";", .start_index = 28, .end_index = 29 });
+
+    try program.parseProgram(&buffer);
+    // for (buffer.items) |item| {
+    //     std.debug.print("The item is '{s}' {any}\n", .{ item.value, item.token_type });
+    // }
+
+    compareTokenizerOutputs(buffer, expected_buffer) catch |err| {
+        std.debug.print("[4/5] failed {any}\n\n", .{err});
+        return;
+    };
+
+    std.debug.print("[4/5] passed\n", .{});
+}
+
+test "five" {
+    const input_text = "const varabl = 34589;";
+    const program = Program.init(input_text);
+
+    var buffer = try std.ArrayList(Token).initCapacity(allocator, 100);
+    var expected_buffer = try std.ArrayList(Token).initCapacity(allocator, 100);
+
+    defer buffer.deinit();
+    defer expected_buffer.deinit();
+
+    try expected_buffer.append(Token{ .token_type = TokenType.KEYWORD, .value = "const", .start_index = 0, .end_index = 5 });
+    try expected_buffer.append(Token{ .token_type = TokenType.IDENTIFIER, .value = "varabl", .start_index = 6, .end_index = 12 });
+    try expected_buffer.append(Token{ .token_type = TokenType.SYMBOL, .value = "=", .start_index = 13, .end_index = 14 });
+    try expected_buffer.append(Token{ .token_type = TokenType.LITERAL, .value = "34589", .start_index = 15, .end_index = 20 });
+    try expected_buffer.append(Token{ .token_type = TokenType.SYMBOL, .value = ";", .start_index = 20, .end_index = 21 });
+
+    try program.parseProgram(&buffer);
+    // for (buffer.items) |item| {
+    //     std.debug.print("The item is '{s}' {any}\n", .{ item.value, item.token_type });
+    // }
+
+    compareTokenizerOutputs(buffer, expected_buffer) catch |err| {
+        std.debug.print("[5/5] failed {any}\n\n", .{err});
+        return;
+    };
+
+    std.debug.print("[5/5] passed\n", .{});
 }
